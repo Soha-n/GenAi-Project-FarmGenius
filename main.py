@@ -184,94 +184,95 @@ def main():
     # Chat interface
     st.markdown("---")
 
-    # Display existing chat history FIRST (before forms/buttons)
+    # Objective-specific inputs (shown once at the top, before chat history)
+    obj_prompt = None
+
+    if objective == "Crop Selection":
+        with st.expander("🌱 Crop Selection — Fill in your details", expanded=not active_history):
+            col1, col2 = st.columns(2)
+            with col1:
+                location = st.text_input("Location (e.g., Punjab, India):", key="obj_crop_loc")
+                soil_type = st.selectbox("Soil Type:", ["Clay", "Sandy", "Loamy", "Silt", "Peaty", "Chalky"], key="obj_crop_soil")
+            with col2:
+                climate = st.selectbox("Climate:", ["Tropical", "Temperate", "Arid", "Semi-arid", "Mediterranean", "Continental"], key="obj_crop_climate")
+
+            if st.button("Suggest Crops", key="obj_crop_btn"):
+                obj_prompt = (
+                    f"Suggest 3-5 suitable crops for farming in {location} with {soil_type} soil and {climate} climate. "
+                    "Give practical reasons and a simple first action plan. Keep your response concise and summarized."
+                )
+
+    elif objective == "Soil Health":
+        with st.expander("🪨 Soil Health — Fill in your details", expanded=not active_history):
+            col1, col2 = st.columns(2)
+            with col1:
+                soil_ph = st.slider("Soil pH Level:", 0.0, 14.0, 7.0, key="obj_soil_ph")
+                n_value = st.text_input("Nitrogen Level (ppm):", key="obj_soil_n")
+            with col2:
+                p_value = st.text_input("Phosphorus Level (ppm):", key="obj_soil_p")
+                k_value = st.text_input("Potassium Level (ppm):", key="obj_soil_k")
+
+            if st.button("Analyze Soil", key="obj_soil_btn"):
+                obj_prompt = (
+                    f"Analyze this soil report: pH={soil_ph}, Nitrogen={n_value} ppm, Phosphorus={p_value} ppm, Potassium={k_value} ppm. "
+                    "Give a soil health diagnosis and improvement steps. Keep your response concise and summarized."
+                )
+
+    elif objective == "Weather Guidance":
+        with st.expander("🌦️ Weather Guidance — Fill in your details", expanded=not active_history):
+            weather_location = st.text_input("Location (e.g., New Delhi, India):", key="obj_weather_loc")
+            if st.button("Get Weather Guidance", key="obj_weather_btn"):
+                obj_prompt = (
+                    f"Provide weather-based farming guidance for {weather_location}. "
+                    "Include short-term planning, irrigation advice, and crop protection suggestions. Keep your response concise and summarized."
+                )
+
+    elif objective == "Pest and Disease Control":
+        with st.expander("🐛 Pest and Disease Control — Fill in your details", expanded=not active_history):
+            col1, col2 = st.columns(2)
+            with col1:
+                pest_crop = st.text_input("Crop (e.g., Wheat, Rice):", key="obj_pest_crop")
+            with col2:
+                pest_issue = st.text_input("Pest/Disease (e.g., Aphids, Rust):", key="obj_pest_issue")
+
+            if st.button("Get Control Methods", key="obj_pest_btn"):
+                obj_prompt = (
+                    f"For {pest_crop} affected by {pest_issue}, provide control methods. "
+                    "Include preventive, organic, and chemical options with safe usage guidance. Keep your response concise and summarized."
+                )
+
+    elif objective == "Fertilizers and Irrigation":
+        with st.expander("💧 Fertilizers and Irrigation — Fill in your details", expanded=not active_history):
+            col1, col2 = st.columns(2)
+            with col1:
+                fert_crop = st.text_input("Crop (e.g., Maize, Tomato):", key="obj_fert_crop")
+            with col2:
+                fert_soil = st.selectbox("Soil Type:", ["Clay", "Sandy", "Loamy", "Silt", "Peaty", "Chalky"], key="obj_fert_soil")
+
+            if st.button("Get Recommendations", key="obj_fert_btn"):
+                obj_prompt = (
+                    f"For {fert_crop} in {fert_soil} soil, recommend fertilizer and irrigation schedule. "
+                    "Include timing, dosage guidance, and water-saving practices. Keep your response concise and summarized."
+                )
+
+    elif objective == "Market Price Information":
+        with st.expander("📈 Market Price Information — Fill in your details", expanded=not active_history):
+            market_crop = st.text_input("Crop (e.g., Wheat, Cotton):", key="obj_market_crop")
+            if st.button("Get Market Info", key="obj_market_btn"):
+                obj_prompt = (
+                    f"Provide current market price guidance for {market_crop} in India. "
+                    "Include trend summary, factors affecting prices, and selling strategy tips. Keep your response concise and summarized."
+                )
+
+    # Display existing chat history below the input form
     for message in active_history:
         with st.chat_message(message["role"]):
             st.markdown(message["content"])
 
-    # Objective-specific inputs
-    if objective == "Crop Selection":
-        st.subheader("🌱 Crop Selection")
-        col1, col2 = st.columns(2)
-        with col1:
-            location = st.text_input("Location (e.g., Punjab, India):", key="obj_crop_loc")
-            soil_type = st.selectbox("Soil Type:", ["Clay", "Sandy", "Loamy", "Silt", "Peaty", "Chalky"], key="obj_crop_soil")
-        with col2:
-            climate = st.selectbox("Climate:", ["Tropical", "Temperate", "Arid", "Semi-arid", "Mediterranean", "Continental"], key="obj_crop_climate")
-
-        if st.button("Suggest Crops", key="obj_crop_btn"):
-            prompt = (
-                f"Suggest 3-5 suitable crops for farming in {location} with {soil_type} soil and {climate} climate. "
-                "Give practical reasons and a simple first action plan. Keep your response concise and summarized."
-            )
-            process_prompt(prompt)
-
-    elif objective == "Soil Health":
-        st.subheader("🪨 Soil Health")
-        col1, col2 = st.columns(2)
-        with col1:
-            soil_ph = st.slider("Soil pH Level:", 0.0, 14.0, 7.0, key="obj_soil_ph")
-            n_value = st.text_input("Nitrogen Level (ppm):", key="obj_soil_n")
-        with col2:
-            p_value = st.text_input("Phosphorus Level (ppm):", key="obj_soil_p")
-            k_value = st.text_input("Potassium Level (ppm):", key="obj_soil_k")
-
-        if st.button("Analyze Soil", key="obj_soil_btn"):
-            prompt = (
-                f"Analyze this soil report: pH={soil_ph}, Nitrogen={n_value} ppm, Phosphorus={p_value} ppm, Potassium={k_value} ppm. "
-                "Give a soil health diagnosis and improvement steps. Keep your response concise and summarized."
-            )
-            process_prompt(prompt)
-
-    elif objective == "Weather Guidance":
-        st.subheader("🌦️ Weather Guidance")
-        weather_location = st.text_input("Location (e.g., New Delhi, India):", key="obj_weather_loc")
-        if st.button("Get Weather Guidance", key="obj_weather_btn"):
-            prompt = (
-                f"Provide weather-based farming guidance for {weather_location}. "
-                "Include short-term planning, irrigation advice, and crop protection suggestions. Keep your response concise and summarized."
-            )
-            process_prompt(prompt)
-
-    elif objective == "Pest and Disease Control":
-        st.subheader("🐛 Pest and Disease Control")
-        col1, col2 = st.columns(2)
-        with col1:
-            pest_crop = st.text_input("Crop (e.g., Wheat, Rice):", key="obj_pest_crop")
-        with col2:
-            pest_issue = st.text_input("Pest/Disease (e.g., Aphids, Rust):", key="obj_pest_issue")
-
-        if st.button("Get Control Methods", key="obj_pest_btn"):
-            prompt = (
-                f"For {pest_crop} affected by {pest_issue}, provide control methods. "
-                "Include preventive, organic, and chemical options with safe usage guidance. Keep your response concise and summarized."
-            )
-            process_prompt(prompt)
-
-    elif objective == "Fertilizers and Irrigation":
-        st.subheader("💧 Fertilizers and Irrigation")
-        col1, col2 = st.columns(2)
-        with col1:
-            fert_crop = st.text_input("Crop (e.g., Maize, Tomato):", key="obj_fert_crop")
-        with col2:
-            fert_soil = st.selectbox("Soil Type:", ["Clay", "Sandy", "Loamy", "Silt", "Peaty", "Chalky"], key="obj_fert_soil")
-
-        if st.button("Get Recommendations", key="obj_fert_btn"):
-            prompt = (
-                f"For {fert_crop} in {fert_soil} soil, recommend fertilizer and irrigation schedule. "
-                "Include timing, dosage guidance, and water-saving practices. Keep your response concise and summarized."
-            )
-            process_prompt(prompt)
-
-    elif objective == "Market Price Information":
-        st.subheader("📈 Market Price Information")
-        market_crop = st.text_input("Crop (e.g., Wheat, Cotton):", key="obj_market_crop")
-        if st.button("Get Market Info", key="obj_market_btn"):
-            prompt = (
-                f"Provide current market price guidance for {market_crop} in India. "
-                "Include trend summary, factors affecting prices, and selling strategy tips. Keep your response concise and summarized."
-            )
-            process_prompt(prompt)
+    # Process the objective form submission (after history is rendered)
+    if obj_prompt:
+        process_prompt(obj_prompt)
+        st.rerun()
 
     # Chat input available in ALL modes for follow-up questions
     if objective == "General Assistant":
