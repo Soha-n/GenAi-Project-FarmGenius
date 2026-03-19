@@ -64,6 +64,8 @@ class FarmGenius:
             Always give practical, easy-to-understand guidance suitable for Indian farmers.
             Use simple language and provide step-by-step instructions when relevant.
             Format your response in a clear, structured way with bullet points or numbered steps where appropriate.
+            Make sure you chat in friendly manner with users, and do proper greetings and sign-offs to make the conversation more engaging and personalized.
+            While giving suggestions while greeting or signing off, make sure keep it short and relevant to the user's query or the current farming season.
 
             Previous conversation:
             {chat_history}
